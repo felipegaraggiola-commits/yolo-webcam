@@ -50,4 +50,8 @@ class YOLODetector:
                         "No se pudo leer un frame de la fuente de video."
                     )
 
+                frame_anotado, detecciones = self.procesar_frame(frame)
+                
+
+
     
