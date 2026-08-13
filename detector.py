@@ -32,3 +32,13 @@ class YOLODetector:
     frame_anotado = resultados[0].plot()
 
     return frame_anotado, detecciones
+
+        def ejecutar(self):
+        self.camara = cv2.VideoCapture(self.fuente_video)
+
+        if not self.camara.isOpened():
+            raise RuntimeError(
+                "No se pudo abrir la fuente de video."
+            )
+
+    
