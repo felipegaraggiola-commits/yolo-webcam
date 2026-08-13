@@ -57,5 +57,7 @@ class YOLODetector:
                   if cv2.waitKey(1) & 0xFF == ord("q"):
                   break
 
-
+  finally:
+            self.camara.release()
+            cv2.destroyAllWindows()
     
