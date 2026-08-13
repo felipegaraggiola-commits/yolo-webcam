@@ -51,7 +51,11 @@ class YOLODetector:
                     )
 
                 frame_anotado, detecciones = self.procesar_frame(frame)
-                
+
+                  cv2.imshow("YOLO - Deteccion", frame_anotado)
+
+                  if cv2.waitKey(1) & 0xFF == ord("q"):
+                  break
 
 
     
