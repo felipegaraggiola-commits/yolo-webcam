@@ -41,4 +41,13 @@ class YOLODetector:
                 "No se pudo abrir la fuente de video."
             )
 
+         try:
+            while True:
+                ret, frame = self.camara.read()
+
+                if not ret:
+                    raise RuntimeError(
+                        "No se pudo leer un frame de la fuente de video."
+                    )
+
     
