@@ -1,4 +1,5 @@
 import cv2
+import time 
 from ultralytics import YOLO
 
 
@@ -8,32 +9,33 @@ class YOLODetector:
         self.fuente_video = fuente_video
         self.umbral_confianza = umbral_confianza
         self.camara = None
+        self.ultima_informacion = {}
 
-        def procesar_frame(self, frame):
-    resultados = self.modelo(
-        frame,
-        conf=self.umbral_confianza,
-        verbose=False
-    )
+    def procesar_frame(self, frame):
+        resultados = self.modelo(
+            frame,
+            conf=self.umbral_confianza,
+            verbose=False
+        )
 
-    detecciones = []
+        detecciones = []
 
-    for resultado in resultados:
-        for caja in resultado.boxes:
-            clase_id = int(caja.cls[0])
-            confianza = float(caja.conf[0])
-            nombre = self.modelo.names[clase_id]
+        for resultado in resultados:
+            for caja in resultado.boxes:
+                clase_id = int(caja.cls[0])
+                confianza = float(caja.conf[0])
+                nombre = self.modelo.names[clase_id]
 
-            detecciones.append({
-                "objeto": nombre,
-                "confianza": confianza
-            })
+                detecciones.append({
+                    "objeto": nombre,
+                    "confianza": confianza
+                })
 
-    frame_anotado = resultados[0].plot()
+        frame_anotado = resultados[0].plot()
 
-    return frame_anotado, detecciones
+        return frame_anotado, detecciones
 
-        def ejecutar(self):
+    def ejecutar(self):
         self.camara = cv2.VideoCapture(self.fuente_video)
 
         if not self.camara.isOpened():
@@ -41,7 +43,7 @@ class YOLODetector:
                 "No se pudo abrir la fuente de video."
             )
 
-         try:
+        try:
             while True:
                 ret, frame = self.camara.read()
 
@@ -52,12 +54,27 @@ class YOLODetector:
 
                 frame_anotado, detecciones = self.procesar_frame(frame)
 
-                  cv2.imshow("YOLO - Deteccion", frame_anotado)
+                ahora = time.time()
 
-                  if cv2.waitKey(1) & 0xFF == ord("q"):
-                  break
+                for deteccion in detecciones:
+                    objeto = deteccion["objeto"]
+                    confianza = deteccion["confianza"]
 
-  finally:
+                    ultima_vez = self.ultima_informacion.get(objeto, 0)
+
+                    if ahora - ultima_vez >= 1:
+                        print(
+                            f"Veo: {objeto} "
+                            f"({confianza:.2f})"
+                        )
+
+                        self.ultima_informacion[objeto] = ahora 
+                        
+                cv2.imshow("YOLO - Deteccion", frame_anotado)
+
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
+
+        finally:
             self.camara.release()
             cv2.destroyAllWindows()
-    
