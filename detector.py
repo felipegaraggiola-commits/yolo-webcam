@@ -11,6 +11,7 @@ class YOLODetector:
         self.umbral_confianza = umbral_confianza
         self.camara = None
         self.ultima_informacion = {}
+        self.fps = 0
         self.logger = logging.getLogger("YOLODetector")
         self.logger.setLevel(logging.INFO)
 
@@ -56,9 +57,24 @@ class YOLODetector:
                 "No se pudo abrir la fuente de video."
             )
 
+        inicio_fps = time.time()
+        contador_frames = 0
+        
         try:
             while True:
+                contador_frames += 1
+
+                tiempo_transcurrido = time.time() - inicio_fps
+
+                if tiempo_transcurrido >= 1:
+                    self.fps = contador_frames / tiempo_transcurrido
+                    print(f"FPS: {self.fps:.2f}")
+
+                    inicio_fps = time.time()
+                    contador_frames = 0
+                    
                 ret, frame = self.camara.read()
+                
 
                 if not ret:
                     raise RuntimeError(
