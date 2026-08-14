@@ -1,5 +1,6 @@
 import cv2
 import time 
+import logging
 from ultralytics import YOLO
 
 
@@ -10,6 +11,18 @@ class YOLODetector:
         self.umbral_confianza = umbral_confianza
         self.camara = None
         self.ultima_informacion = {}
+        self.logger = logging.getLogger("YOLODetector")
+        self.logger.setLevel(logging.INFO)
+
+        if not self.logger.handlers:
+            archivo = logging.FileHandler("salida.log", encoding="utf-8")
+            formato = logging.Formatter(
+                "[%(asctime)s] %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S"
+            )
+
+            archivo.setFormatter(formato)
+            self.logger.addHandler(archivo)
 
     def procesar_frame(self, frame):
         resultados = self.modelo(
@@ -53,7 +66,6 @@ class YOLODetector:
                     )
 
                 frame_anotado, detecciones = self.procesar_frame(frame)
-
                 ahora = time.time()
 
                 for deteccion in detecciones:
@@ -63,13 +75,15 @@ class YOLODetector:
                     ultima_vez = self.ultima_informacion.get(objeto, 0)
 
                     if ahora - ultima_vez >= 1:
-                        print(
-                            f"Veo: {objeto} "
-                            f"({confianza:.2f})"
-                        )
+                        mensaje = f"Veo: {objeto} ({confianza:.2f})"
 
-                        self.ultima_informacion[objeto] = ahora 
+                        print(mensaje)
+                        self.logger.info(mensaje)
+
+                        self.ultima_informacion[objeto] = ahora
+
                         
+
                 cv2.imshow("YOLO - Deteccion", frame_anotado)
 
                 if cv2.waitKey(1) & 0xFF == ord("q"):
